@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 import { CitySearch } from "@/components/weather/city-search";
 import { CurrentWeather } from "@/components/weather/current-weather";
+import { DailyForecast } from "@/components/weather/daily-forecast";
+import { HourlyForecast } from "@/components/weather/hourly-forecast";
 import { LocationButton } from "@/components/weather/location-button";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/use-weather";
@@ -57,13 +59,17 @@ export default function Home() {
       {/* Loading */}
       {isLoading && <WeatherSkeleton />}
 
-      {/* Current Weather */}
+      {/* Current Weather + Forecasts */}
       {weather && location && !isLoading && (
-        <CurrentWeather
-          weather={weather.current}
-          cityName={location.name}
-          country={location.country}
-        />
+        <>
+          <CurrentWeather
+            weather={weather.current}
+            cityName={location.name}
+            country={location.country}
+          />
+          <HourlyForecast hours={weather.hourly} />
+          <DailyForecast days={weather.daily} />
+        </>
       )}
 
       {/* Empty state — only show when geo has finished and no weather yet */}

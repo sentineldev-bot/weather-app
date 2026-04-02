@@ -47,10 +47,25 @@ export interface DailyForecast {
   sunset: string;
 }
 
+/** Hourly forecast entry */
+export interface HourlyForecast {
+  time: string;
+  temp: number;
+  weatherCode: number;
+  description: string;
+  icon: string;
+  precipProb: number;
+  windSpeed: number;
+  windDir: number;
+  humidity: number;
+  isDay: boolean;
+}
+
 /** Full weather response */
 export interface WeatherData {
   current: CurrentWeather;
   daily: DailyForecast[];
+  hourly: HourlyForecast[];
   timezone: string;
   latitude: number;
   longitude: number;
