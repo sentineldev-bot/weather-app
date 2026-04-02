@@ -1,0 +1,64 @@
+// ============================================================
+// Open-Meteo API Types (SEN-375)
+// ============================================================
+
+/** Geocoding search result */
+export interface GeoLocation {
+  name: string;
+  country: string;
+  countryCode: string;
+  admin1: string;
+  latitude: number;
+  longitude: number;
+  population: number;
+  timezone: string;
+}
+
+/** Current weather conditions */
+export interface CurrentWeather {
+  temp: number;
+  feelsLike: number;
+  humidity: number;
+  windSpeed: number;
+  windDir: number;
+  pressure: number;
+  uvIndex: number;
+  visibility: number;
+  weatherCode: number;
+  description: string;
+  icon: string;
+  isDay: boolean;
+  time: string;
+}
+
+/** Daily forecast entry */
+export interface DailyForecast {
+  date: string;
+  tempMax: number;
+  tempMin: number;
+  weatherCode: number;
+  description: string;
+  icon: string;
+  precipSum: number;
+  precipProb: number;
+  windMax: number;
+  uvMax: number;
+  sunrise: string;
+  sunset: string;
+}
+
+/** Full weather response */
+export interface WeatherData {
+  current: CurrentWeather;
+  daily: DailyForecast[];
+  timezone: string;
+  latitude: number;
+  longitude: number;
+}
+
+/** Weather code mapping entry */
+export interface WeatherCodeInfo {
+  desc: string;
+  icon: string;
+  night: string;
+}

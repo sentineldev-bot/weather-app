@@ -1,10 +1,19 @@
-import { Cloud, MapPin, Thermometer, Wind } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+"use client";
+
+import { AlertCircle } from "lucide-react";
+import { CitySearch } from "@/components/weather/city-search";
+import { CurrentWeather } from "@/components/weather/current-weather";
+import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
+import { useWeather } from "@/hooks/use-weather";
+import type { GeoLocation } from "@/lib/types";
 
 export default function Home() {
+  const { weather, location, loading, error, fetchForLocation } = useWeather();
+
+  function handleSelect(loc: GeoLocation) {
+    fetchForLocation(loc);
+  }
+
   return (
     <div className="space-y-8">
       {/* Search */}
@@ -15,93 +24,38 @@ export default function Home() {
         <p className="text-center text-muted-foreground">
           Search for any city to get real-time weather and forecasts
         </p>
-        <div className="flex w-full max-w-md gap-2">
-          <Input placeholder="Search city..." className="flex-1" />
-          <Button>
-            <MapPin className="mr-2 h-4 w-4" />
-            Search
-          </Button>
-        </div>
+        <CitySearch onSelect={handleSelect} />
       </section>
 
-      {/* Current Weather Skeleton (placeholder for SEN-375+) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Cloud className="h-5 w-5" />
-            Current Weather
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="flex items-center gap-4">
-              <div className="text-6xl">🌤️</div>
-              <div>
-                <p className="text-4xl font-light tabular-nums">--°C</p>
-                <p className="text-muted-foreground">Feels like --°C</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <DetailCard
-                icon={<Thermometer className="h-4 w-4" />}
-                label="Humidity"
-                value="--%"
-              />
-              <DetailCard
-                icon={<Wind className="h-4 w-4" />}
-                label="Wind"
-                value="-- km/h"
-              />
-              <DetailCard
-                icon={<Cloud className="h-4 w-4" />}
-                label="Pressure"
-                value="-- hPa"
-              />
-              <DetailCard
-                icon={<MapPin className="h-4 w-4" />}
-                label="Visibility"
-                value="-- km"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 5-Day Forecast Skeleton */}
-      <section>
-        <h3 className="mb-4 text-lg font-semibold">5-Day Forecast</h3>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Card key={i} className="text-center">
-              <CardContent className="p-4">
-                <Skeleton className="mx-auto mb-2 h-4 w-12" />
-                <Skeleton className="mx-auto mb-2 h-10 w-10 rounded-full" />
-                <Skeleton className="mx-auto h-4 w-16" />
-              </CardContent>
-            </Card>
-          ))}
+      {/* Error */}
+      {error && (
+        <div className="flex items-center gap-3 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 text-destructive" />
+          <p>{error}</p>
         </div>
-      </section>
-    </div>
-  );
-}
+      )}
 
-function DetailCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-1 rounded-lg bg-muted/50 p-3">
-      <div className="flex items-center gap-1 text-muted-foreground">
-        {icon}
-        <span className="text-xs">{label}</span>
-      </div>
-      <span className="text-sm font-medium tabular-nums">{value}</span>
+      {/* Loading */}
+      {loading && <WeatherSkeleton />}
+
+      {/* Current Weather */}
+      {weather && location && !loading && (
+        <CurrentWeather
+          weather={weather.current}
+          cityName={location.name}
+          country={location.country}
+        />
+      )}
+
+      {/* Empty state */}
+      {!weather && !loading && !error && (
+        <div className="py-16 text-center">
+          <p className="text-4xl">🌤️</p>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Search for a city above to see current weather
+          </p>
+        </div>
+      )}
     </div>
   );
 }
