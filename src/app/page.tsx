@@ -14,7 +14,7 @@ import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/use-weather";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useFavorites } from "@/hooks/use-favorites";
-import { reverseGeocode, fetchWeather } from "@/lib/weather-api";
+import { reverseGeocode } from "@/lib/weather-api";
 import type { GeoLocation } from "@/lib/types";
 
 export default function Home() {
