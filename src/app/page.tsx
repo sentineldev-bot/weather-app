@@ -1,30 +1,49 @@
 "use client";
 
+import { useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 import { CitySearch } from "@/components/weather/city-search";
 import { CurrentWeather } from "@/components/weather/current-weather";
+import { LocationButton } from "@/components/weather/location-button";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/use-weather";
+import { useGeolocation } from "@/hooks/use-geolocation";
 import type { GeoLocation } from "@/lib/types";
 
 export default function Home() {
   const { weather, location, loading, error, fetchForLocation } = useWeather();
+  const geo = useGeolocation(true);
+
+  // When geolocation succeeds, auto-fetch weather
+  useEffect(() => {
+    if (geo.status === "granted" && geo.location && !weather && !loading) {
+      fetchForLocation(geo.location);
+    }
+  }, [geo.status, geo.location, weather, loading, fetchForLocation]);
 
   function handleSelect(loc: GeoLocation) {
     fetchForLocation(loc);
   }
 
+  function handleGeoClick() {
+    geo.detect();
+  }
+
+  // Show loading if either geo is detecting or weather is loading
+  const isLoading = loading || (geo.status === "loading" && !weather);
+
   return (
     <div className="space-y-8">
-      {/* Search */}
+      {/* Search + Location */}
       <section className="flex flex-col items-center gap-4">
         <h2 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
           Check the Weather
         </h2>
         <p className="text-center text-muted-foreground">
-          Search for any city to get real-time weather and forecasts
+          Search for any city or use your location
         </p>
         <CitySearch onSelect={handleSelect} />
+        <LocationButton status={geo.status} onClick={handleGeoClick} />
       </section>
 
       {/* Error */}
@@ -36,10 +55,10 @@ export default function Home() {
       )}
 
       {/* Loading */}
-      {loading && <WeatherSkeleton />}
+      {isLoading && <WeatherSkeleton />}
 
       {/* Current Weather */}
-      {weather && location && !loading && (
+      {weather && location && !isLoading && (
         <CurrentWeather
           weather={weather.current}
           cityName={location.name}
@@ -47,12 +66,12 @@ export default function Home() {
         />
       )}
 
-      {/* Empty state */}
-      {!weather && !loading && !error && (
+      {/* Empty state — only show when geo has finished and no weather yet */}
+      {!weather && !isLoading && !error && geo.hasAutoDetected && (
         <div className="py-16 text-center">
           <p className="text-4xl">🌤️</p>
           <p className="mt-4 text-lg text-muted-foreground">
-            Search for a city above to see current weather
+            Search for a city or allow location access to see weather
           </p>
         </div>
       )}
