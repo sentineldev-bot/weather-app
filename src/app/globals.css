@@ -51,5 +51,75 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Smooth theme transitions */
+html {
+  transition: color-scheme 0.3s;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Focus visible styles for accessibility */
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-ring;
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 640px) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Exception for inline text links */
+  p a,
+  span a {
+    min-height: auto;
+    min-width: auto;
+  }
+}
+
+/* Scrollbar styling for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+/* Leaflet map dark mode override */
+.dark .leaflet-container {
+  background: hsl(var(--background));
+}
+
+.dark .leaflet-control-zoom a {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .leaflet-popup-content-wrapper,
+.dark .leaflet-popup-tip {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
+/* Consistent card hover for dark mode */
+.dark .hover\:-translate-y-0\.5:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
