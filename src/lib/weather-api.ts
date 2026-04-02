@@ -5,6 +5,7 @@ import type {
   HourlyForecast,
 } from "./types";
 import { decodeWeatherCode } from "./weather-codes";
+import { deriveAlerts } from "./weather-alerts";
 
 const GEO_BASE = "https://geocoding-api.open-meteo.com/v1";
 const WEATHER_BASE = "https://api.open-meteo.com/v1";
@@ -208,14 +209,20 @@ function normalizeWeatherData(raw: RawWeatherResponse): WeatherData {
     }
   }
 
-  return {
+  const result: WeatherData = {
     current,
     daily,
     hourly,
+    alerts: [],
     timezone: raw.timezone || "auto",
     latitude: raw.latitude,
     longitude: raw.longitude,
   };
+
+  // Derive alerts from weather conditions (SEN-380)
+  result.alerts = deriveAlerts(result);
+
+  return result;
 }
 
 // ============================================================

@@ -7,6 +7,7 @@ import { CurrentWeather } from "@/components/weather/current-weather";
 import { DailyForecast } from "@/components/weather/daily-forecast";
 import { HourlyForecast } from "@/components/weather/hourly-forecast";
 import { LocationButton } from "@/components/weather/location-button";
+import { WeatherAlerts } from "@/components/weather/weather-alerts";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/use-weather";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -58,6 +59,11 @@ export default function Home() {
 
       {/* Loading */}
       {isLoading && <WeatherSkeleton />}
+
+      {/* Alerts — shown above weather when active */}
+      {weather && weather.alerts.length > 0 && !isLoading && (
+        <WeatherAlerts alerts={weather.alerts} />
+      )}
 
       {/* Current Weather + Forecasts */}
       {weather && location && !isLoading && (

@@ -66,9 +66,21 @@ export interface WeatherData {
   current: CurrentWeather;
   daily: DailyForecast[];
   hourly: HourlyForecast[];
+  alerts: WeatherAlert[];
   timezone: string;
   latitude: number;
   longitude: number;
+}
+
+/** Weather alert */
+export interface WeatherAlert {
+  id: string;
+  event: string;
+  severity: "extreme" | "severe" | "moderate" | "minor" | "unknown";
+  description: string;
+  start: string;
+  end: string;
+  senderName: string;
 }
 
 /** Weather code mapping entry */
