@@ -8,11 +8,13 @@ import { DailyForecast } from "@/components/weather/daily-forecast";
 import { FavoritesSection } from "@/components/weather/favorites-section";
 import { HourlyForecast } from "@/components/weather/hourly-forecast";
 import { LocationButton } from "@/components/weather/location-button";
+import { WeatherMap } from "@/components/weather/weather-map";
 import { WeatherAlerts } from "@/components/weather/weather-alerts";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/use-weather";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useFavorites } from "@/hooks/use-favorites";
+import { reverseGeocode, fetchWeather } from "@/lib/weather-api";
 import type { GeoLocation } from "@/lib/types";
 
 export default function Home() {
@@ -44,6 +46,21 @@ export default function Home() {
     } else {
       addFavorite(location);
     }
+  }
+
+  async function handleMapClick(lat: number, lon: number) {
+    const geo = await reverseGeocode(lat, lon);
+    const loc: GeoLocation = {
+      name: geo?.name || "Map Location",
+      country: geo?.country || "",
+      countryCode: "",
+      admin1: geo?.admin1 || "",
+      latitude: lat,
+      longitude: lon,
+      population: 0,
+      timezone: "auto",
+    };
+    fetchForLocation(loc);
   }
 
   const isLoading = loading || (geo.status === "loading" && !weather);
@@ -101,6 +118,11 @@ export default function Home() {
           />
           <HourlyForecast hours={weather.hourly} />
           <DailyForecast days={weather.daily} />
+          <WeatherMap
+            latitude={weather.latitude}
+            longitude={weather.longitude}
+            onLocationClick={handleMapClick}
+          />
         </>
       )}
 
