@@ -5,11 +5,13 @@ import {
   Droplets,
   Eye,
   Gauge,
+  Star,
   Sun,
   Thermometer,
   Wind,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { windDirection } from "@/lib/weather-api";
 import type { CurrentWeather as CurrentWeatherType } from "@/lib/types";
 
@@ -17,12 +19,18 @@ interface CurrentWeatherProps {
   weather: CurrentWeatherType;
   cityName: string;
   country: string;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+  canFavorite?: boolean;
 }
 
 export function CurrentWeather({
   weather,
   cityName,
   country,
+  isFavorite = false,
+  onToggleFavorite,
+  canFavorite = true,
 }: CurrentWeatherProps) {
   return (
     <Card>
@@ -35,6 +43,27 @@ export function CurrentWeather({
               <span className="text-sm font-normal text-muted-foreground">
                 {country}
               </span>
+            )}
+            {onToggleFavorite && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={onToggleFavorite}
+                disabled={!canFavorite && !isFavorite}
+                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                title={
+                  !canFavorite && !isFavorite
+                    ? "Maximum favorites reached"
+                    : isFavorite
+                      ? "Remove from favorites"
+                      : "Add to favorites"
+                }
+              >
+                <Star
+                  className={`h-4 w-4 ${isFavorite ? "fill-yellow-400 text-yellow-400" : ""}`}
+                />
+              </Button>
             )}
           </span>
           {weather.time && (
