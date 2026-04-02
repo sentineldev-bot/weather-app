@@ -1,4 +1,9 @@
-import type { GeoLocation, WeatherData, DailyForecast } from "./types";
+import type {
+  GeoLocation,
+  WeatherData,
+  DailyForecast,
+  HourlyForecast,
+} from "./types";
 import { decodeWeatherCode } from "./weather-codes";
 
 const GEO_BASE = "https://geocoding-api.open-meteo.com/v1";
@@ -67,6 +72,16 @@ const DAILY_PARAMS = [
   "uv_index_max",
 ].join(",");
 
+const HOURLY_PARAMS = [
+  "temperature_2m",
+  "weather_code",
+  "precipitation_probability",
+  "wind_speed_10m",
+  "wind_direction_10m",
+  "relative_humidity_2m",
+  "is_day",
+].join(",");
+
 /**
  * Fetch current weather + 7-day forecast from Open-Meteo.
  */
@@ -81,6 +96,7 @@ export async function fetchWeather(
     `&longitude=${lon}` +
     `&current=${CURRENT_PARAMS}` +
     `&daily=${DAILY_PARAMS}` +
+    `&hourly=${HOURLY_PARAMS}` +
     `&timezone=${encodeURIComponent(timezone)}` +
     `&forecast_days=7`;
 
@@ -111,6 +127,16 @@ interface RawWeatherResponse {
     precipitation_probability_max: number[];
     wind_speed_10m_max: number[];
     uv_index_max: number[];
+  };
+  hourly?: {
+    time: string[];
+    temperature_2m: number[];
+    weather_code: number[];
+    precipitation_probability: number[];
+    wind_speed_10m: number[];
+    wind_direction_10m: number[];
+    relative_humidity_2m: number[];
+    is_day: number[];
   };
   timezone?: string;
   latitude: number;
@@ -162,9 +188,30 @@ function normalizeWeatherData(raw: RawWeatherResponse): WeatherData {
     }
   }
 
+  const hourly: HourlyForecast[] = [];
+  if (raw.hourly?.time) {
+    for (let i = 0; i < raw.hourly.time.length; i++) {
+      const hIsNight = raw.hourly.is_day[i] === 0;
+      const hCode = decodeWeatherCode(raw.hourly.weather_code[i], hIsNight);
+      hourly.push({
+        time: raw.hourly.time[i],
+        temp: Math.round(raw.hourly.temperature_2m[i]),
+        weatherCode: raw.hourly.weather_code[i],
+        description: hCode.desc,
+        icon: hCode.icon,
+        precipProb: raw.hourly.precipitation_probability[i],
+        windSpeed: Math.round(raw.hourly.wind_speed_10m[i]),
+        windDir: raw.hourly.wind_direction_10m[i],
+        humidity: raw.hourly.relative_humidity_2m[i],
+        isDay: raw.hourly.is_day[i] === 1,
+      });
+    }
+  }
+
   return {
     current,
     daily,
+    hourly,
     timezone: raw.timezone || "auto",
     latitude: raw.latitude,
     longitude: raw.longitude,
