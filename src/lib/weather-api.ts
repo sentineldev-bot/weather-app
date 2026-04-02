@@ -172,6 +172,47 @@ function normalizeWeatherData(raw: RawWeatherResponse): WeatherData {
 }
 
 // ============================================================
+// Reverse Geocoding (SEN-377)
+// ============================================================
+
+interface ReverseGeoResult {
+  name: string;
+  country: string;
+  admin1: string;
+}
+
+/**
+ * Reverse geocode coordinates to a city name via Nominatim (free, no key).
+ */
+export async function reverseGeocode(
+  lat: number,
+  lon: number
+): Promise<ReverseGeoResult | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&accept-language=en`;
+    const res = await fetchWithTimeout(url, 5000);
+    const data = await res.json();
+
+    if (data?.address) {
+      return {
+        name:
+          data.address.city ||
+          data.address.town ||
+          data.address.village ||
+          data.address.county ||
+          data.address.state ||
+          "Unknown",
+        country: data.address.country || "",
+        admin1: data.address.state || "",
+      };
+    }
+  } catch {
+    // Fallback silently — caller handles null
+  }
+  return null;
+}
+
+// ============================================================
 // Utilities
 // ============================================================
 
