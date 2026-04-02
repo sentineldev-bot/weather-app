@@ -1,0 +1,35 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Weather App",
+  description:
+    "Real-time weather forecasts powered by Open-Meteo. Built with Next.js, Tailwind CSS, and shadcn/ui.",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <div className="relative flex min-h-screen flex-col">
+          <Header />
+          <main className="flex-1">
+            <div className="container mx-auto max-w-4xl px-4 py-6">
+              {children}
+            </div>
+          </main>
+          <Footer />
+        </div>
+      </body>
+    </html>
+  );
+}
