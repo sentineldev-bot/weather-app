@@ -5,17 +5,26 @@ import { AlertCircle } from "lucide-react";
 import { CitySearch } from "@/components/weather/city-search";
 import { CurrentWeather } from "@/components/weather/current-weather";
 import { DailyForecast } from "@/components/weather/daily-forecast";
+import { FavoritesSection } from "@/components/weather/favorites-section";
 import { HourlyForecast } from "@/components/weather/hourly-forecast";
 import { LocationButton } from "@/components/weather/location-button";
 import { WeatherAlerts } from "@/components/weather/weather-alerts";
 import { WeatherSkeleton } from "@/components/weather/weather-skeleton";
 import { useWeather } from "@/hooks/use-weather";
 import { useGeolocation } from "@/hooks/use-geolocation";
+import { useFavorites } from "@/hooks/use-favorites";
 import type { GeoLocation } from "@/lib/types";
 
 export default function Home() {
   const { weather, location, loading, error, fetchForLocation } = useWeather();
   const geo = useGeolocation(true);
+  const {
+    favorites,
+    isFavorite,
+    addFavorite,
+    removeFavorite,
+    canAdd,
+  } = useFavorites();
 
   // When geolocation succeeds, auto-fetch weather
   useEffect(() => {
@@ -28,12 +37,19 @@ export default function Home() {
     fetchForLocation(loc);
   }
 
-  function handleGeoClick() {
-    geo.detect();
+  function handleToggleFavorite() {
+    if (!location) return;
+    if (isFavorite(location.latitude, location.longitude)) {
+      removeFavorite(location.latitude, location.longitude);
+    } else {
+      addFavorite(location);
+    }
   }
 
-  // Show loading if either geo is detecting or weather is loading
   const isLoading = loading || (geo.status === "loading" && !weather);
+  const currentIsFav = location
+    ? isFavorite(location.latitude, location.longitude)
+    : false;
 
   return (
     <div className="space-y-8">
@@ -46,8 +62,15 @@ export default function Home() {
           Search for any city or use your location
         </p>
         <CitySearch onSelect={handleSelect} />
-        <LocationButton status={geo.status} onClick={handleGeoClick} />
+        <LocationButton status={geo.status} onClick={() => geo.detect()} />
       </section>
+
+      {/* Favorites */}
+      <FavoritesSection
+        favorites={favorites}
+        onSelect={handleSelect}
+        onRemove={removeFavorite}
+      />
 
       {/* Error */}
       {error && (
@@ -60,7 +83,7 @@ export default function Home() {
       {/* Loading */}
       {isLoading && <WeatherSkeleton />}
 
-      {/* Alerts — shown above weather when active */}
+      {/* Alerts */}
       {weather && weather.alerts.length > 0 && !isLoading && (
         <WeatherAlerts alerts={weather.alerts} />
       )}
@@ -72,13 +95,16 @@ export default function Home() {
             weather={weather.current}
             cityName={location.name}
             country={location.country}
+            isFavorite={currentIsFav}
+            onToggleFavorite={handleToggleFavorite}
+            canFavorite={canAdd}
           />
           <HourlyForecast hours={weather.hourly} />
           <DailyForecast days={weather.daily} />
         </>
       )}
 
-      {/* Empty state — only show when geo has finished and no weather yet */}
+      {/* Empty state */}
       {!weather && !isLoading && !error && geo.hasAutoDetected && (
         <div className="py-16 text-center">
           <p className="text-4xl">🌤️</p>
